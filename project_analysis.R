@@ -1,4 +1,4 @@
-library(caret); library(randomForest); library(dplyr); library(MASS)
+library(caret); library(randomForest); library(dplyr)
 setwd("~/Desktop/Coursera/Practical Machine Learning/PML_Project/")
 
 # Read in data and perform data cleaning
@@ -16,19 +16,22 @@ training.test <- training[-inTrain,]; write.csv(training.test, file = "pml-train
 
 # Train with three methods
 modFit <- train(classe ~ ., method = "lda", data = training.train[,-c(1,2)]); saveRDS(modFit, "mySavedModel001.rds")
+        modFit.time <- system.time(train(classe ~ ., method = "lda", data = training.train[,-c(1,2)]))
 modFit2 <- train(classe ~ ., method = "rpart", data = training.train[,-c(1,2)]); saveRDS(modFit2, "mySavedModel002.rds")
+        modFit2.time <- system.time(train(classe ~ ., method = "rpart", data = training.train[,-c(1,2)]))
 modFit3 <- randomForest(classe ~ ., data = training.train[,-c(1,2)]); saveRDS(modFit3, "mySavedModel003.rds")
-modFit3
+        modFit3.time <- system.time(randomForest(classe ~ ., data = training.train[,-c(1,2)]))
 
+mod.time <- data.frame(lda = as.matrix(modFit.time)[3], rpart = as.matrix(modFit2.time)[3], 
+                       randomForest = as.matrix(modFit3.time)[3], row.names = "elapsed time (sec)")
+        write.table(mod.time, "3 Models_elapsed time.txt")
 answers1 <- predict(modFit, training.test[,-c(1,2,length(training.test))])
 answers2 <- predict(modFit2, training.test[,-c(1,2,length(training.test))])
 answers3 <- predict(modFit3, training.test[,-c(1,2,length(training.test))])
 
-# Cross Validation
-table(training.test$classe, answers1)
-table(training.test$classe, answers2)
-table(training.test$classe, answers3)
+write.table(answers1, "answers1.txt"); write.table(answers2, "answers2.txt"); write.table(answers3, "answers3.txt")
 
+# Cross Validation
 confusionMatrix(training.test$classe, answers1)
 confusionMatrix(training.test$classe, answers2)
 confusionMatrix(training.test$classe, answers3)

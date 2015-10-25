@@ -4,13 +4,51 @@ author: "Yukai Zou"
 date: "24 October, 2015"
 output: html_document
 ---
+## Summary
+Using devices to recognize human activity is one of the most cutting-edge technologies in the 21st century, attracting smart data scientists to find solutions. There are currently over a hundred machine learning packages that are available for making predictions, but which one is the best for a particular application is always debatable. In the context of human activity recognition, predicting with high accuracy yet not consuming unreasonable amount of time is the fundamental concern, as these devices need to recognize the user's behavior quickly and respond with warnings or instruction messages, especially in monitoring elderly groups or correcting improper performance in physical exercises. To briefly demonstrating how the model is chosen, we employed linear discriminant analysis (*lda*), tree-based model (*rpart*), and random forest model (*randomForest*). Among the three models during cross validation, *randomTree* outweighed the other two in accuracy for predicting the classe on the testing set, plus do not consume much time. In the final testing, *randomForest* predicted all the 20 cases correctly.
 
-This report describes how the models were built and selected, how cross validation was used, and the expected out of sample error for each model, and why the final model was chosen. The selected prediction model was also applied to predict 20 different test cases.
+## Data
+The data used in this project is available from <http://groupware.les.inf.puc-rio.br/har> (see Reference). Data were acquired from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. The participants were asked to lift barbell in 5 different ways, both correctly and incorrectly. There are both training and testing datasets (see Reference). In the training dataset, there are 19622 rows and 160 columns; in the testing dataset, there are 20 rows and 160 columns.
 
+## Model Fitting and Interpretation
+### Strategy
+We first began with cleaning the training dataset through some exploratory analysis. After removing the useless variables, the training dataset was splitted into subsets of training and testing data. Three models were fitted using the subset of training data, and cross validations were performed using the subset of testing data. Accuracy, out of sample error and elapsed time for each model were measured during cross validations. Based on the overall performance in accuracy and the elapsed time, the best model was chosen for predicting the 20 cases in the testing dataset.
+
+### Results of Model Fitting
+* lda
+```{r, echo=FALSE}
+modFit <- readRDS("mySavedModel001.rds")
+modFit
+```
+
+* rpart
+```{r, echo=FALSE}
+modFit2 <- readRDS("mySavedModel002.rds")
+modFit2
+modFit2$finalModel
+plot(modFit2$finalModel, uniform=TRUE, main = "Classification Tree")
+text(modFit2$finalModel, use.n=TRUE, all=TRUE, cex=.8)
+```
+
+* randomForest
+```{r, echo=FALSE}
+library(randomForest)
+modFit3 <- readRDS("mySavedModel003.rds")
+modFit3
+```
+
+Elapsed time of the three models:
+```{r, echo=FALSE}
+read.table("3 Models_elapsed time.txt", header=TRUE)
+```
+
+### Result of Cross Validations
 ```{r, echo=FALSE}
 setwd("~/Desktop/Coursera/Practical Machine Learning/PML_Project/")
 library(caret)
 library(randomForest)
+library(MASS)
+library(rpart)
 
 # Read in data and perform data cleaning
 training <- read.csv("pml-training_processed.csv")
@@ -22,26 +60,77 @@ modFit <- readRDS("mySavedModel001.rds")
 modFit2 <- readRDS("mySavedModel002.rds")
 modFit3 <- readRDS("mySavedModel003.rds")
 
-modFit; modFit2; modFit3
-
 answers1 <- predict(modFit, training.test[,-c(1,2,length(training.test))])
 answers2 <- predict(modFit2, training.test[,-c(1,2,length(training.test))])
 answers3 <- predict(modFit3, training.test[,-c(1,2,length(training.test))])
 
 # Cross Validation
-table(training.test$classe, answers1)
-table(training.test$classe, answers2)
-table(training.test$classe, answers3)
-
 confusionMatrix(training.test$classe, answers1)
 confusionMatrix(training.test$classe, answers2)
 confusionMatrix(training.test$classe, answers3)
+```
 
-# Use the whole training set to make prediction
+### Final Results of Prediction
+Using the model fitted through *randomForest*, the final results of predicting the 20 cases in the testing dataset are:
+
+```{r, echo=FALSE}
+setwd("~/Desktop/Coursera/Practical Machine Learning/PML_Project/")
+testing <- read.csv("pml-testing_processed.csv")
 finalMod <- readRDS("mySavedModel_final.rds")
 finalMod.predict <- predict(finalMod, newdata = testing[,-c(1,2,length(testing))])
 finalMod.predict
 ```
 
-Reference:
-<http://groupware.les.inf.puc-rio.br/har>
+## Additional Notes
+All the results were produced under R version 3.2.0, x86\_64\_apple-darwin13.4.0 (64-bit), running under OS X 10.10.5 (Yosemite). The packages involved are: *rpart_4.1-10*, *MASS_7.3-44*, *dplyr_0.4.3*, *randomForest_4.6-12*, *caret_6.0-57*, *ggplot2_1.0.1*, *lattice_0.20-33*.
+
+## Reference
+1. Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. Qualitative Activity Recognition of Weight Lifting Exercises. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013. Available from: <http://groupware.les.inf.puc-rio.br/har>
+2. Training data: <https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv>
+3. Testing data: <https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv>
+
+## Appendix: R Codes
+```{r, eval=FALSE}
+library(caret); library(randomForest); library(dplyr)
+setwd("~/Desktop/Coursera/Practical Machine Learning/PML_Project/")
+
+# Read in data and perform data cleaning
+training <- read.csv("pml-training.csv", na.strings = c("NA", "")); training.NAlist <- grep("NA", training); training <- select(training, -training.NAlist)
+testing <- read.csv("pml-testing.csv", na.strings = c("NA", "")); testing.NAlist <- grep("NA", testing); testing <- select(testing, -testing.NAlist)
+training[,-length(training)] <- data.frame(sapply(training[,-length(training)], as.numeric))
+testing[,-length(testing)] <- data.frame(sapply(testing[,-length(testing)], as.numeric))
+        write.csv(training, "pml-training_processed.csv", row.names=FALSE)
+        write.csv(testing, "pml-testing_processed.csv", row.names=FALSE)
+
+# Create subset within the training data set for cross validation
+inTrain <- createDataPartition(y=training$classe, p=0.7, list=FALSE)
+training.train <- training[inTrain,]; write.csv(training.train, file = "pml-training_train.csv", row.names = FALSE)
+training.test <- training[-inTrain,]; write.csv(training.test, file = "pml-training_test.csv", row.names = FALSE)
+
+# Train with three methods
+modFit <- train(classe ~ ., method = "lda", data = training.train[,-c(1,2)]); saveRDS(modFit, "mySavedModel001.rds")
+        modFit.time <- system.time(train(classe ~ ., method = "lda", data = training.train[,-c(1,2)]))
+modFit2 <- train(classe ~ ., method = "rpart", data = training.train[,-c(1,2)]); saveRDS(modFit2, "mySavedModel002.rds")
+        modFit2.time <- system.time(train(classe ~ ., method = "rpart", data = training.train[,-c(1,2)]))
+modFit3 <- randomForest(classe ~ ., data = training.train[,-c(1,2)]); saveRDS(modFit3, "mySavedModel003.rds")
+        modFit3.time <- system.time(randomForest(classe ~ ., data = training.train[,-c(1,2)]))
+
+mod.time <- data.frame(lda = as.matrix(modFit.time)[3], rpart = as.matrix(modFit2.time)[3], 
+                       randomForest = as.matrix(modFit3.time)[3], row.names = "elapsed time (sec)")
+        write.table(mod.time, "3 Models_elapsed time.txt")
+answers1 <- predict(modFit, training.test[,-c(1,2,length(training.test))])
+answers2 <- predict(modFit2, training.test[,-c(1,2,length(training.test))])
+answers3 <- predict(modFit3, training.test[,-c(1,2,length(training.test))])
+
+write.table(answers1, "answers1.txt"); write.table(answers2, "answers2.txt"); write.table(answers3, "answers3.txt")
+
+# Cross Validation
+confusionMatrix(training.test$classe, answers1)
+confusionMatrix(training.test$classe, answers2)
+confusionMatrix(training.test$classe, answers3)
+
+# Use the whole training set to make prediction
+finalMod <- randomForest(classe ~ ., data = training[,-c(1,2)]); saveRDS(finalMod, "mySavedModel_final.rds")
+finalMod.predict <- predict(finalMod, newdata = testing[,-c(1,2,length(testing))])
+finalMod.predict
+```

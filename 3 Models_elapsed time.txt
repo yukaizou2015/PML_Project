@@ -1,0 +1,2 @@
+"lda" "rpart" "randomForest"
+"elapsed time (sec)" 13.747 60.844 49.073
