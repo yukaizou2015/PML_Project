@@ -7,21 +7,41 @@ output: html_document
 
 This report describes how the models were built and selected, how cross validation was used, and the expected out of sample error for each model, and why the final model was chosen. The selected prediction model was also applied to predict 20 different test cases.
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r, echo=FALSE}
+setwd("~/Desktop/Coursera/Practical Machine Learning/PML_Project/")
+library(caret)
+library(randomForest)
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+# Read in data and perform data cleaning
+training <- read.csv("pml-training_processed.csv")
+testing <- read.csv("pml-testing_processed.csv")
+training.train <- read.csv("pml-training_train.csv")
+training.test <- read.csv("pml-training_test.csv")
+# Train with three methods
+modFit <- readRDS("mySavedModel001.rds")
+modFit2 <- readRDS("mySavedModel002.rds")
+modFit3 <- readRDS("mySavedModel003.rds")
 
-```{r}
-summary(cars)
+modFit; modFit2; modFit3
+
+answers1 <- predict(modFit, training.test[,-c(1,2,length(training.test))])
+answers2 <- predict(modFit2, training.test[,-c(1,2,length(training.test))])
+answers3 <- predict(modFit3, training.test[,-c(1,2,length(training.test))])
+
+# Cross Validation
+table(training.test$classe, answers1)
+table(training.test$classe, answers2)
+table(training.test$classe, answers3)
+
+confusionMatrix(training.test$classe, answers1)
+confusionMatrix(training.test$classe, answers2)
+confusionMatrix(training.test$classe, answers3)
+
+# Use the whole training set to make prediction
+finalMod <- readRDS("mySavedModel_final.rds")
+finalMod.predict <- predict(finalMod, newdata = testing[,-c(1,2,length(testing))])
+finalMod.predict
 ```
 
 Reference:
 <http://groupware.les.inf.puc-rio.br/har>
-
-You can also embed plots, for example:
-
-```{r, echo=FALSE}
-plot(cars)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
