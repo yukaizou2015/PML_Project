@@ -12,37 +12,41 @@ The data used in this project is available from <http://groupware.les.inf.puc-ri
 
 ## Model Fitting and Interpretation
 ### Strategy
-We first began with cleaning the training dataset through some exploratory analysis. After removing the useless variables, the training dataset was splitted into subsets of training and testing data. Three models were fitted using the subset of training data, and cross validations were performed using the subset of testing data. Accuracy, out of sample error and elapsed time for each model were measured during cross validations. Based on the overall performance in accuracy and the elapsed time, the best model was chosen for predicting the 20 cases in the testing dataset.
+We first began with cleaning the training dataset through some exploratory analysis. After removing the useless variables, the training dataset was splitted into subsets of training and testing data. Three models were fitted using the subset of training data, and cross validations were performed using the subset of testing data. Accuracy, out of sample error, and elapsed time for each model were measured during cross validations. Based on the overall performance in accuracy and the elapsed time, the best model was chosen for predicting the 20 cases in the testing dataset.
 
 ### Results of Model Fitting
-* lda
+- **lda**
 ```{r, echo=FALSE}
 modFit <- readRDS("mySavedModel001.rds")
-modFit
+modFit$results
 ```
 
-* rpart
+- **rpart**
 ```{r, echo=FALSE}
 modFit2 <- readRDS("mySavedModel002.rds")
-modFit2
+modFit2$results
 modFit2$finalModel
 plot(modFit2$finalModel, uniform=TRUE, main = "Classification Tree")
 text(modFit2$finalModel, use.n=TRUE, all=TRUE, cex=.8)
 ```
 
-* randomForest
+- **randomForest**
 ```{r, echo=FALSE}
 library(randomForest)
 modFit3 <- readRDS("mySavedModel003.rds")
 modFit3
 ```
 
-Elapsed time of the three models:
+Among the three methods, *randomForest* had a very low OOB estimate of error rate (0.09%), whereas *rpart* had a very low performance in terms of accuracy (less than 50%).
+
+**Elapsed time of fitting three models:**
 ```{r, echo=FALSE}
 read.table("3 Models_elapsed time.txt", header=TRUE)
 ```
+Among the three methods, *lda* was the fastest, *rpart* took more than a minute to complete the fitting, which was the longest among the three. *randomForest* took slightly longer than *lda*, but the fitting was completed within a minute.
 
 ### Result of Cross Validations
+- **lda**
 ```{r, echo=FALSE}
 setwd("~/Desktop/Coursera/Practical Machine Learning/PML_Project/")
 library(caret)
@@ -57,22 +61,61 @@ training.train <- read.csv("pml-training_train.csv")
 training.test <- read.csv("pml-training_test.csv")
 # Train with three methods
 modFit <- readRDS("mySavedModel001.rds")
-modFit2 <- readRDS("mySavedModel002.rds")
-modFit3 <- readRDS("mySavedModel003.rds")
 
 answers1 <- predict(modFit, training.test[,-c(1,2,length(training.test))])
-answers2 <- predict(modFit2, training.test[,-c(1,2,length(training.test))])
-answers3 <- predict(modFit3, training.test[,-c(1,2,length(training.test))])
 
 # Cross Validation
 confusionMatrix(training.test$classe, answers1)
+```
+
+- **rpart**
+```{r, echo=FALSE}
+setwd("~/Desktop/Coursera/Practical Machine Learning/PML_Project/")
+library(caret)
+library(randomForest)
+library(MASS)
+library(rpart)
+
+# Read in data and perform data cleaning
+training <- read.csv("pml-training_processed.csv")
+testing <- read.csv("pml-testing_processed.csv")
+training.train <- read.csv("pml-training_train.csv")
+training.test <- read.csv("pml-training_test.csv")
+# Train with three methods
+modFit2 <- readRDS("mySavedModel002.rds")
+
+answers2 <- predict(modFit2, training.test[,-c(1,2,length(training.test))])
+
+# Cross Validation
 confusionMatrix(training.test$classe, answers2)
+```
+
+- **randomForest**
+```{r, echo=FALSE}
+setwd("~/Desktop/Coursera/Practical Machine Learning/PML_Project/")
+library(caret)
+library(randomForest)
+library(MASS)
+library(rpart)
+
+# Read in data and perform data cleaning
+training <- read.csv("pml-training_processed.csv")
+testing <- read.csv("pml-testing_processed.csv")
+training.train <- read.csv("pml-training_train.csv")
+training.test <- read.csv("pml-training_test.csv")
+# Train with three methods
+modFit3 <- readRDS("mySavedModel003.rds")
+
+answers3 <- predict(modFit3, training.test[,-c(1,2,length(training.test))])
+
+# Cross Validation
 confusionMatrix(training.test$classe, answers3)
 ```
 
-### Final Results of Prediction
-Using the model fitted through *randomForest*, the final results of predicting the 20 cases in the testing dataset are:
+In cross validations, the model fitted through *randomForest* performed the best among the three methods, classifying most of the classe correctly with an accuracy of 99.93%; *lda* ranked the second, with an accuracy of 80.51%; *rpart* was the worst, with an accuracy of only 47.33% and did not categorized any "B" and "D" correctly, according to the confusion matrix. Given the elapsed time of each method, *randomForest* was overall the best method among the three.
 
+### Final Results of Prediction
+Using the model fitted with *randomForest*, the final results of predicting the 20 cases in the testing dataset are:
 ```{r, echo=FALSE}
 setwd("~/Desktop/Coursera/Practical Machine Learning/PML_Project/")
 testing <- read.csv("pml-testing_processed.csv")
@@ -82,7 +125,7 @@ finalMod.predict
 ```
 
 ## Additional Notes
-All the results were produced under R version 3.2.0, x86\_64\_apple-darwin13.4.0 (64-bit), running under OS X 10.10.5 (Yosemite). The packages involved are: *rpart_4.1-10*, *MASS_7.3-44*, *dplyr_0.4.3*, *randomForest_4.6-12*, *caret_6.0-57*, *ggplot2_1.0.1*, *lattice_0.20-33*.
+The methods *lda* and *rpart* were implemented through *caret* package. All the results were produced under R version 3.2.0, x86\_64\_apple-darwin13.4.0 (64-bit), running under OS X 10.10.5 (Yosemite). The packages involved are: *rpart_4.1-10*, *MASS_7.3-44*, *dplyr_0.4.3*, *randomForest_4.6-12*, *caret_6.0-57*, *ggplot2_1.0.1*, *lattice_0.20-33*.
 
 ## Reference
 1. Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. Qualitative Activity Recognition of Weight Lifting Exercises. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013. Available from: <http://groupware.les.inf.puc-rio.br/har>
