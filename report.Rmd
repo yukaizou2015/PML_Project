@@ -1,0 +1,27 @@
+---
+title: "Practical Machine Learning Course Project Report"
+author: "Yukai Zou"
+date: "24 October, 2015"
+output: html_document
+---
+
+This report describes how the models were built and selected, how cross validation was used, and the expected out of sample error for each model, and why the final model was chosen. The selected prediction model was also applied to predict 20 different test cases.
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+summary(cars)
+```
+
+Reference:
+<http://groupware.les.inf.puc-rio.br/har>
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
