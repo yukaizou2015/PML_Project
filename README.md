@@ -19,13 +19,13 @@ Due to security concerns with the exchange of R code, your code will not be run 
 
 ## What is contained in this repository
 - project_analysis.R: the original codes for fitting and selecting the models and make predictions.
-- report.Rmd: the R markdown file of the final report.
-- report.html: the html file of the final report.
-- pml-testing.csv: the testing dataset
-- pml-testing_processed.csv: the testing dataset after cleaning
-- pml-training.csv: the training dataset
-- pml-training_processed.csv: the training dataset after cleaning
-- pml-training_test.csv: the subset of testing data which was used for cross validation
-- pml-training_train.csv: the subset of training data which was used for cross validation
-- pml\_write\_files.R: the codes for creating files which contain answers for the 20 predictions
-- problem\_answers: the subdirectory containing the 20 files created through pml\_write\_files.R.
+- report.Rmd: R markdown version of the final report.
+- report.html: HTML version of the final report.
+- pml-testing.csv: Testing dataset.
+- pml-testing_processed.csv: The testing dataset after cleaning.
+- pml-training.csv: Training dataset.
+- pml-training_processed.csv: The training dataset after cleaning.
+- pml-training_test.csv: The subset of testing data which was used for cross validation.
+- pml-training_train.csv: The subset of training data which was used for cross validation.
+- pml\_write\_files.R: The codes for creating files which contain answers for the 20 predictions.
+- problem\_answers: The subdirectory containing the 20 files created through pml\_write\_files.R.
