@@ -278,7 +278,7 @@ testing[,-length(testing)] &lt;- data.frame(sapply(testing[,-length(testing)], a
         write.csv(testing, &quot;pml-testing_processed.csv&quot;, row.names=FALSE)
 
 # Create subset within the training data set for cross validation
-inTrain &lt;- createDataPartition(y=training$classe, p=0.7, list=FALSE)
+inTrain &lt;- createDataPartition(y=training$X, p=0.7, list=FALSE)
 training.train &lt;- training[inTrain,]; write.csv(training.train, file = &quot;pml-training_train.csv&quot;, row.names = FALSE)
 training.test &lt;- training[-inTrain,]; write.csv(training.test, file = &quot;pml-training_test.csv&quot;, row.names = FALSE)
 
