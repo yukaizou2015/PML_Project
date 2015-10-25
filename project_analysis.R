@@ -29,8 +29,6 @@ answers1 <- predict(modFit, training.test[,-c(1,2,length(training.test))])
 answers2 <- predict(modFit2, training.test[,-c(1,2,length(training.test))])
 answers3 <- predict(modFit3, training.test[,-c(1,2,length(training.test))])
 
-write.table(answers1, "answers1.txt"); write.table(answers2, "answers2.txt"); write.table(answers3, "answers3.txt")
-
 # Cross Validation
 confusionMatrix(training.test$classe, answers1)
 confusionMatrix(training.test$classe, answers2)

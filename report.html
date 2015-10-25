@@ -297,8 +297,6 @@ answers1 &lt;- predict(modFit, training.test[,-c(1,2,length(training.test))])
 answers2 &lt;- predict(modFit2, training.test[,-c(1,2,length(training.test))])
 answers3 &lt;- predict(modFit3, training.test[,-c(1,2,length(training.test))])
 
-write.table(answers1, &quot;answers1.txt&quot;); write.table(answers2, &quot;answers2.txt&quot;); write.table(answers3, &quot;answers3.txt&quot;)
-
 # Cross Validation
 confusionMatrix(training.test$classe, answers1)
 confusionMatrix(training.test$classe, answers2)
